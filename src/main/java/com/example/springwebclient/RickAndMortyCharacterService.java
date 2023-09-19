@@ -1,5 +1,7 @@
 package com.example.springwebclient;
 
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -10,7 +12,12 @@ import java.util.List;
 @Service
 public class RickAndMortyCharacterService {
 
-    private final WebClient webClient = WebClient.create("https://rickandmortyapi.com/api/character");
+    private final WebClient webClient;
+
+
+    public RickAndMortyCharacterService(@Value("${rickandmorty.api.url}") String url) {
+        webClient = WebClient.create(url);
+    }
 
     public List<RickAndMortyCharacter> getCharacters() {
 
