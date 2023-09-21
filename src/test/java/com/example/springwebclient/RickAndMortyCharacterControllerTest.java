@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -117,6 +118,115 @@ class RickAndMortyCharacterControllerTest {
               """));
     }
 
+    @Test
+    void getCharactersByStatus() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader("Content-Type",
+                        "application/json")
+                .setBody("""
+                                  {
+                                  "results":
+                                    [
+                                       {
+                                              "id": 11,
+                                              "name": "Albert Einstein",
+                                               "species": "Human",
+                                              "status": "Dead",
+                                              "origin": {
+                                                  "name": "Earth (C-137)",
+                                                  "url": "https://rickandmortyapi.com/api/location/1"
+                                              }
+                                        }
+                                    ]
+                                   }
+                                   
+                                  """));
 
+
+        String status ="Dead";
+        String newUri = "?status=" + status;
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/status" + newUri)
+                        .param("status",status)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+
+[
+                                  {
+                                              "id": 11,
+                                              "name": "Albert Einstein",
+                                               "species": "Human",
+                                              "status": "Dead",
+                                              "origin": {
+                                                  "name": "Earth (C-137)",
+                                                  "url": "https://rickandmortyapi.com/api/location/1"
+                                              }
+                                   }
+                                   ]
+"""));
+
+    }
+
+    @Test
+    void getStatisticForSpecies() throws Exception {
+    mockWebServer.enqueue(new MockResponse()
+            .setHeader("Content-Type",
+                    "application/json")
+            .setBody("""
+                                  {
+                                    "info": {
+                                             "count": 2
+                                                },
+                                  "results":
+                                    [
+                                       {
+                                              "id": 11,
+                                              "name": "Albert Einstein",
+                                               "species": "Human",
+                                              "status": "Alive",
+                                              "origin": {
+                                                  "name": "Earth (C-137)",
+                                                  "url": "https://rickandmortyapi.com/api/location/1"
+                                              }
+                                        },
+                                        {
+                                                "id": 20,
+                                                "name": "Ants in my Eyes Johnson",
+                                                "species": "Human",
+                                                "status": "Alive",
+                                                "origin": {
+                                                    "name": "unknown",
+                                                    "url": ""
+                                                          }
+                                          },
+                                          {
+                                                "id": 1,
+                                                "name": "Rick Sanchez",
+                                                "species": "Human",
+                                                "status": "Dead",
+                                                "origin": {
+                                                      "name": "Earth (C-137)",
+                                                      "url": "https://rickandmortyapi.com/api/location/1"
+                                                 }
+                                           }
+                                           
+                                        
+                                    ]
+                                   }
+                                   
+                                  """));
+
+
+    String status ="Alive";
+    String species ="Human";
+    String newUri = "?status=" + status +"&species=" + species;
+    mockMvc.perform(MockMvcRequestBuilders.get("/api/characters/species-statistic" + newUri)
+                   // .param("status",status) //das macht keinen Sinn, weil ich es schon in der Url eingeschrieben habe
+                    //.param("species",species)
+                    )
+            .andExpect(status().isOk())
+            .andExpect(content().string("2"));
+
+}
 
 }
